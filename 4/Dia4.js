@@ -15,21 +15,21 @@ try {
   let count2 = 0;
   const diagonalCoordinates = []
   const directions = [
-        [0, 1],  // Derecha
-        [1, 0],  // Abajo
-        [0, -1], // Izquierda
-        [-1, 0], // Arriba
-        [1, 1],  // Diagonal abajo-derecha
-        [1, -1], // Diagonal abajo-izquierda
-        [-1, 1], // Diagonal arriba-derecha
-        [-1, -1] // Diagonal arriba-izquierda
+        [0, 1],  
+        [1, 0],  
+        [0, -1], 
+        [-1, 0], 
+        [1, 1],  
+        [1, -1], 
+        [-1, 1], 
+        [-1, -1] 
   ];
 
   const directions2 = [
-    [1, 1],  // Diagonal abajo-derecha
-    [1, -1], // Diagonal abajo-izquierda
-    [-1, 1], // Diagonal arriba-derecha
-    [-1, -1] // Diagonal arriba-izquierda
+    [1, 1],  
+    [1, -1], 
+    [-1, 1], 
+    [-1, -1] 
 ];
   function isWordAt(x, y, dx, dy, wordLength, words) {
     for (let i = 0; i < wordLength; i++) {
