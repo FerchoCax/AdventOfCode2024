@@ -1,9 +1,9 @@
 const fs = require('fs');
-// const filePath = './3/input.txt';
+//const filePath = './3/input.txt';
 const filePath = './input.txt';
 try {
   const fileContent = fs.readFileSync(filePath, 'utf-8');
-  const values = fileContent.split('\n').map(e => e.replace('\r', '').split(''))
+  let values = fileContent.split('\n').map(e => e.replace('\r', '').split(''))
   const responce = [...values]
   let direction = 0;
   let maxY = values.length-1;
@@ -11,7 +11,6 @@ try {
   let diferentPositions = 0
   let usedPositions =[]
   // const counts = {};
-  let loopCount = 0
   const directions = [
     [-1,0], //arriba
     [0,1], //derecha
@@ -19,32 +18,27 @@ try {
     [0,-1]  //izquierda
   ]
   let startPosition = findStart()
-  movePosition(startPosition)
+  let startPosition2 = findStart()
+  movePosition(startPosition2)
 
   for (const res of responce) {
     diferentPositions += res.filter(e => e == 'X').length
   }
 
-  for (const position of usedPositions) {
-    if(validateLoop(position)){
-      loopCount+=1
-    } 
-  }
 
-  console.log(loopCount)
-
-  // console.log(usedPositions)
-  // console.log(diferentPositions)
+  console.log(diferentPositions)
+  values = fileContent.split('\n').map(e => e.replace('\r', '').split(''))
+  console.log(findValidObstructionPositions().length)
 
 
   function findStart(){
-    let startPosition;
+    let startPositions;
     values.forEach((e,index) => {
         if(e.indexOf('^') != -1){
-            startPosition = [index, e.indexOf('^')]
+            startPositions = [index, e.indexOf('^')]
         }
     })
-    return startPosition
+    return startPositions
   }
 
   function movePosition(postion){
@@ -56,7 +50,6 @@ try {
       y:postion[0],
       x:postion[1]
     })
-    // usedPositions.push( postion)
     if(newPosition[0] > maxY || newPosition[1] > maxX || newPosition[0] < 0 || newPosition[1] < 0){
         responce[postion[0]][postion[1]] = 'X'
         return;
@@ -74,25 +67,65 @@ try {
     movePosition(newPosition)
   }
 
-  function validateLoop(position){
-    let positions = usedPositions.filter(e => e.x == position.x && e.y == position.y)
-
-    if(positions.length <2){
-      return false;
+  function simulateWithObstacle(obstacle) {
+    let direction = 0;
+    let y = startPosition[0];
+    let x = startPosition[1];
+    const visited = new Set();
+    if (obstacle) {
+      values[obstacle[0]][obstacle[1]] = '#'; 
     }
-    for (const pos of positions) {
-      if(position.direction == 0 && pos.direction == 1 || 
-         position.direction == 1 && pos.direction == 2 ||
-         position.direction == 2 && pos.direction == 3 ||
-         position.direction == 3 && pos.direction == 0
-      ){
-        console.log(responce[(position.y+(position.direction))][position.x+(position.direction)])
-        if(responce[(position.y+(position.direction))][position.x+(position.direction)] != "#"){
-          return true
-        }
+
+    while (true) {
+      const state = `${y},${x},${direction}`;
+      if (visited.has(state)) {
+        
+        if (obstacle) values[obstacle[0]][obstacle[1]] = '.'; 
+        return true;
+      }
+      visited.add(state);
+
+      // Calcula la nueva posición
+      const newY = y + directions[direction][0];
+      const newX = x + directions[direction][1];
+
+      if (
+        newY < 0 || newX < 0 || newY > maxY || newX > maxX || 
+        values[newY][newX] === '#'
+      ) {
+        // Si hay un obstáculo o estamos fuera del mapa, giramos a la derecha
+        direction = (direction + 1) % 4;
+      } else {
+        // De lo contrario, avanzamos
+        y = newY;
+        x = newX;
+      }
+
+      // Si salimos del mapa, no hay bucle
+      if (newY < 0 || newX < 0 || newY > maxY || newX > maxX) {
+        if (obstacle) values[obstacle[0]][obstacle[1]] = '.'; // Limpia la obstrucción temporal
+        return false;
       }
     }
   }
+
+  function findValidObstructionPositions() {
+    const validPositions = [];
+    for (let y = 0; y <= maxY; y++) {
+      for (let x = 0; x <= maxX; x++) {
+        // No colocar obstrucción en la posición inicial ni donde ya hay obstáculos
+        if ((y !== startPosition[0] || x !== startPosition[1]) && values[y][x] === '.') {
+          if (simulateWithObstacle([y, x])) {
+            validPositions.push([y, x]);
+          }
+        }
+      }
+    }
+    return validPositions;
+  }
+
+
+
 
 } catch (err) {
     console.log(err)
